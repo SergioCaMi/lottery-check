@@ -44,7 +44,14 @@
         document.querySelector('#checkNumbersForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const date = document.getElementById('date').value;
-            // TODO: Realizar llamada al servidor. Procesar los datos y rellenar adecuadamente el DIV
+            const response = await fetch(`/api/check-date?date=${date}`);
+            const result = await response.json();
+            if (result.status === 'ok' && result.numberWinner) {
+                document.getElementById('numbersResult').value =
+                    `${result.numberWinner.winning_numbers} - Suplemental: ${result.numberWinner.supplemental_numbers} - Super Ball: ${result.numberWinner.super_ball}`;
+            } else {
+                document.getElementById('numbersResult').value = 'No hay números premiados.';
+            }
         });
 
         document.querySelector('#checkYourNumberForm').addEventListener('submit', (e) => {
