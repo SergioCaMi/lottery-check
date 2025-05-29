@@ -54,11 +54,20 @@
             }
         });
 
-        document.querySelector('#checkYourNumberForm').addEventListener('submit', (e) => {
+        document.querySelector('#checkYourNumberForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const date = document.getElementById('yourDate').value;
             const yourNumbers = document.getElementById('yourNumbers').value;
-            // TODO: Realizar llamada al servidor. Procesar los datos y rellenar adecuadamente el DIV        
+            const yourNumbersResult = document.getElementById('yourNumbersResult');
+            const response = await fetch(`/api/get-computed-results?date=${date}&playedNumbers=${yourNumbers}`);
+            const result = await response.json();
+            if (result.status === 'ok') {
+                yourNumbersResult.value = `Cantidad de aciertos: ${result.prizeLottery.match_numbers}, Premio obtenido: $${result.prizeLottery.prize}`;
+            } else {
+                yourNumbersResult.value = 'Error al comprobar los números.';
+            }
+
+
         });
     </script>
 </body>

@@ -15,6 +15,7 @@ app.use(logger('dev'));
 // nos gustaría que también gestionaras los datos de tipo JSON (entre ellos los POST que nos lleguen)
 app.use(express.urlencoded({ extended: true }));  // Middleware para parsear datos de formularios
 const numbers = JSON.parse(fs.readFileSync('./data/lottery.json'));
+const prizes = JSON.parse(fs.readFileSync('./data/prizes.json'));
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/views/index.html');
 })
@@ -22,7 +23,6 @@ app.get('/', (req, res) => {
 app.get('/api/check-date', (req, res) => {
     const datenumber = req.query.date;
     const numberWinner = numbers.find(n => n.draw_date.includes(datenumber));
-    console.log(numberWinner);
     if (numberWinner) {
         res.json({
             status: 'ok',
@@ -33,6 +33,29 @@ app.get('/api/check-date', (req, res) => {
             status: 'error',
             message: 'No hay número ganador para esa fecha'
         });
+    }
+})
+
+
+app.get('/api/get-computed-results', (req, res) => {
+    const datenumber = req.query.date;
+    const dateLottery = numbers.find(n => n.draw_date.includes(datenumber));
+    console.log(dateLottery);
+    if (dateLottery) {
+        const numbers = (`${dateLottery.winning_numbers} ${dateLottery.supplemental_numbers} ${dateLottery.super_ball}`).split(' ').map(num => parseInt(num.trim()));
+        const playedNumbers = req.query.playedNumbers.split(' ').map(num => parseInt(num.trim()));
+        const matchedNumbers = playedNumbers.filter(num => numbers.includes(num));
+        const prizeLottery = prizes.find(p => +p.match_numbers === +matchedNumbers.length);  
+        console.log(prizeLottery);
+        res.json({
+            status: 'ok',
+            dateLottery: dateLottery,
+            numbers: numbers,
+            playedNumbers: playedNumbers,
+            matchedNumbers: matchedNumbers,
+            prizeLottery: prizeLottery
+        });    
+            
     }
 })
 // Levantar el servidor
